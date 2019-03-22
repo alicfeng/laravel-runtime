@@ -9,6 +9,7 @@ namespace AlicFeng\Runtime\Repository;
 use AlicFeng\Runtime\Common\Application;
 use AlicFeng\Runtime\Common\RedisKey;
 use DateTime;
+use Log;
 
 class DataRepository
 {
@@ -46,34 +47,42 @@ class DataRepository
      */
     public function reload($starDate, $endDate)
     {
-        $startDateTime = $starDate ? new DateTime($starDate) : new DateTime('1970-01-01');
-        $endDateTime   = $endDate ? new DateTime($endDate) : new DateTime();
-        $list          = [];
-        $this->clear();
+        try {
+            $startDateTime = $starDate ? new DateTime($starDate) : new DateTime('1970-01-01');
 
-        if ('daily' === config('runtime.log', 'daily')) {
-            $logs     = scandir(Application::getRuntimeLogPath());
-            $logFiles = array_filter($logs, function ($value) {
-                /*filter . .. runtime.log*/
-                return !in_array($value, ['.', '..', 'runtime.log'], true);
-            });
-            $logFiles = array_filter($logFiles, function ($value) use ($startDateTime, $endDateTime) {
-                /*datetime filter*/
-                $time = strtotime(explode('.log', $value)[0]);
-                return $time >= $startDateTime->getTimestamp() && $time <= $endDateTime->getTimestamp();
-            });
-            foreach ($logFiles as $logFile) {
-                /*read content by loop through*/
-                $this->readFile($list, Application::getRuntimeLogPath() . $logFile, $startDateTime, $endDateTime);
-            }
-        } else {
-            $logPath = Application::getRuntimeLogPath() . 'runtime.log';
+            $endDateTime = $endDate ? new DateTime($endDate) : new DateTime();
+            $list        = [];
             $this->clear();
-            $this->readFile($list, $logPath, $startDateTime, $endDateTime);
+
+            if ('daily' === config('runtime.log', 'daily')) {
+                if (!is_dir(Application::getRuntimeLogPath())) {
+                    return;
+                }
+                $logs     = scandir(Application::getRuntimeLogPath());
+                $logFiles = array_filter($logs, function ($value) {
+                    /*filter . .. runtime.log*/
+                    return !in_array($value, ['.', '..', 'runtime.log'], true);
+                });
+                $logFiles = array_filter($logFiles, function ($value) use ($startDateTime, $endDateTime) {
+                    /*datetime filter*/
+                    $time = strtotime(explode('.log', $value)[0]);
+                    return $time >= $startDateTime->getTimestamp() && $time <= $endDateTime->getTimestamp();
+                });
+                foreach ($logFiles as $logFile) {
+                    /*read content by loop through*/
+                    $this->readFile($list, Application::getRuntimeLogPath() . $logFile, $startDateTime, $endDateTime);
+                }
+            } else {
+                $logPath = Application::getRuntimeLogPath() . 'runtime.log';
+                $this->clear();
+                $this->readFile($list, $logPath, $startDateTime, $endDateTime);
+            }
+            /*SORT_DESC*/
+            array_multisort(array_column($list, 'count'), SORT_DESC, $list);
+            $this->redis->set(RedisKey::RUNTIME_LIST, json_encode($list, JSON_UNESCAPED_UNICODE));
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
         }
-        /*SORT_DESC*/
-        array_multisort(array_column($list, 'count'), SORT_DESC, $list);
-        $this->redis->set(RedisKey::RUNTIME_LIST, json_encode($list, JSON_UNESCAPED_UNICODE));
     }
 
     /**
