@@ -1,4 +1,31 @@
-## Laravel Runtime
+## 
+
+
+
+<h1 align="center">
+    <a href="https://github.com/alicfeng/laravel-runtime">
+        Laravel Runtime
+    </a>
+</h1>
+<p align="center"> 
+    laravel-runtime features for Laravel Application
+    <img src="https://raw.githubusercontent.com/alicfeng/laravel-runtime/master/file/runtime.jpg" />
+</p>
+<p align="center">
+	<a href="https://packagist.org/packages/alicfeng/laravel-runtime">
+    	<img src="https://poser.pugx.org/alicfeng/laravel-runtime/v/stable.svg" alt="Latest Stable Version">
+    </a>
+    <a href="https://packagist.org/packages/alicfeng/laravel-runtime">
+        <img src="https://poser.pugx.org/alicfeng/laravel-runtime/d/total.svg" alt="Total Downloads">
+    </a>
+	<a href="https://packagist.org/packages/alicfeng/laravel-runtime">
+    	<img src="https://poser.pugx.org/alicfeng/laravel-runtime/license.svg" alt="License">
+    </a>
+</p>
+
+<h1 align="center">
+<a href="https://github.styleci.io/repos/127536154">
+</h1>
 
 #### 前言
 
@@ -85,3 +112,18 @@ php artisan samego:runtime [help] [--service {reload|analysis}] [--start] [--end
 - `WEB`
 
 浏览器打开`$host/runtime/analysis`即可看到展示~
+
+
+
+#### tail日志
+
+```shell
+➜ tail -f storage/logs/laravel-2019-04-24.log
+[2019-04-24 11:38:44] production.INFO: trace request message begin  
+[2019-04-24 11:38:44] production.INFO: router  : order/v1/interface/name  
+[2019-04-24 11:38:44] production.INFO: method  : POST  
+[2019-04-24 11:38:44] production.INFO: ip      : 113.118.235.220  
+[2019-04-24 11:38:44] production.INFO: params  : {"header":{"userToken":"token"},"body":{"param":"alicfeng"}  
+[2019-04-24 11:38:44] production.INFO: trace request message end
+```
+
